@@ -1,0 +1,24 @@
+name: Tool versions
+description: Exposes the tool versions pinned in .tool-versions as outputs.
+
+outputs:
+  terraform:
+    description: Terraform version.
+    value: ${{ steps.read.outputs.terraform }}
+  terraform_docs:
+    description: terraform-docs version.
+    value: ${{ steps.read.outputs.terraform_docs }}
+  trivy:
+    description: Trivy version.
+    value: ${{ steps.read.outputs.trivy }}
+
+runs:
+  using: composite
+  steps:
+    - id: read
+      shell: bash
+      run: |
+        while read -r tool version _; do
+          case "$tool" in ''|\#*) continue ;; esac
+          echo "${tool//-/_}=${version}" >> "$GITHUB_OUTPUT"
+        done < .tool-versions

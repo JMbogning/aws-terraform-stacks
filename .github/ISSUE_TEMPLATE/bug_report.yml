@@ -1,0 +1,42 @@
+name: Bug report
+description: A module or stack does not behave as documented.
+labels: [bug]
+body:
+  - type: input
+    id: component
+    attributes:
+      label: Module or stack
+      placeholder: modules/network
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened?
+      description: Include the command you ran and the full error output.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal configuration to reproduce
+      description: Remove account IDs, IP addresses and any other sensitive value.
+      render: hcl
+
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      placeholder: terraform 1.17.2, hashicorp/aws 6.x, repository tag v1.0.0
+    validations:
+      required: true

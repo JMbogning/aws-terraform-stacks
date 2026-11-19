@@ -1,0 +1,124 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  terraform:
+    name: Format, validate and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - id: versions
+        uses: ./.github/actions/tool-versions
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: ${{ steps.versions.outputs.terraform }}
+          terraform_wrapper: false
+
+      - name: Check formatting
+        run: make fmt-check
+
+      - name: Validate
+        run: make validate
+
+      - name: Test
+        run: make test
+
+  lint:
+    name: TFLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: terraform-linters/setup-tflint@6ffdbaa3be476b3431f7275c26966ef32ff60337 # v6.3.2
+        with:
+          tflint_version_file: .tool-versions
+          cache: true
+
+      - name: Lint
+        run: make lint
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - id: versions
+        uses: ./.github/actions/tool-versions
+
+      - name: Install terraform-docs
+        env:
+          VERSION: ${{ steps.versions.outputs.terraform_docs }}
+        run: |
+          base="https://github.com/terraform-docs/terraform-docs/releases/download/v${VERSION}"
+          cd "$RUNNER_TEMP"
+          curl -fsSLO "${base}/terraform-docs-v${VERSION}-linux-amd64.tar.gz"
+          curl -fsSLO "${base}/terraform-docs-v${VERSION}.sha256sum"
+          sha256sum --check --ignore-missing "terraform-docs-v${VERSION}.sha256sum"
+          tar -xzf "terraform-docs-v${VERSION}-linux-amd64.tar.gz" terraform-docs
+          sudo install terraform-docs /usr/local/bin/terraform-docs
+
+      - name: Check generated documentation
+        run: make docs-check
+
+  security:
+    name: Trivy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - id: versions
+        uses: ./.github/actions/tool-versions
+
+      - name: Scan configuration
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v${{ steps.versions.outputs.trivy }}
+          scan-type: config
+          scan-ref: .
+          format: sarif
+          output: trivy.sarif
+          exit-code: "0"
+
+      - name: Upload results to code scanning
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: trivy.sarif
+          category: trivy
+
+      - name: Fail on high and critical findings
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          version: v${{ steps.versions.outputs.trivy }}
+          skip-setup-trivy: true
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"

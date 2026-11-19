@@ -1,0 +1,31 @@
+# Terraform working directories and state
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Saved plans (see scripts/stack.sh)
+tfplan
+tfplan.commit
+*.tfplan
+
+# Overrides and CLI configuration
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Modules do not pin provider versions: only root configurations commit a lock file
+modules/**/.terraform.lock.hcl
+
+# Values that must not be published (account IDs, IP allow lists)
+local.auto.tfvars
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.swp
+.DS_Store
