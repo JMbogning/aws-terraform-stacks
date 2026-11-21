@@ -32,6 +32,6 @@ repos:
           - --args=--severity=HIGH,CRITICAL
           - --args=--skip-dirs="**/.terraform"
       - id: terraform_docs
-        files: ^modules/[^/]+/[^/]+\.tf$
+        files: ^(modules|bootstrap)/[^/]+/[^/]+\.tf$
         args:
           - --args=--config=.terraform-docs.yml
