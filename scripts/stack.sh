@@ -27,8 +27,10 @@ stack="$2"
 dir="environments/${stack}"
 plan_file="tfplan"
 commit_file="tfplan.commit"
+backend_config="${PWD}/backend.hcl"
 
 [[ -d "$dir" ]] || die "$dir does not exist"
+[[ -f "$backend_config" ]] || die "backend.hcl not found, see bootstrap/state-backend/README.md"
 
 require_clean_main() {
   local branch
@@ -49,7 +51,7 @@ current_revision() {
 
 case "$action" in
   plan)
-    terraform -chdir="$dir" init -input=false
+    terraform -chdir="$dir" init -input=false -backend-config="$backend_config"
     terraform -chdir="$dir" plan -input=false -out="$plan_file"
     current_revision > "$dir/$commit_file"
     ;;
@@ -63,7 +65,7 @@ case "$action" in
     ;;
   destroy)
     require_clean_main
-    terraform -chdir="$dir" init -input=false
+    terraform -chdir="$dir" init -input=false -backend-config="$backend_config"
     terraform -chdir="$dir" destroy
     ;;
   *)
