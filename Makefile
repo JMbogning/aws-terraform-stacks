@@ -5,6 +5,7 @@ SHELL := bash
 STACK ?=
 TF_DIRS = $(shell scripts/terraform-dirs.sh)
 MODULE_DIRS = $(shell find modules -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
+BOOTSTRAP_DIRS = $(shell find bootstrap -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
 
 .PHONY: help
 help: ## List available targets
@@ -38,20 +39,20 @@ scan: ## Fail on HIGH and CRITICAL misconfigurations
 	trivy config --exit-code 1 --severity HIGH,CRITICAL --skip-dirs "**/.terraform" .
 
 .PHONY: docs
-docs: ## Generate module documentation
-	@for dir in $(MODULE_DIRS); do \
+docs: ## Generate module and bootstrap documentation
+	@for dir in $(MODULE_DIRS) $(BOOTSTRAP_DIRS); do \
 		terraform-docs --config "$(CURDIR)/.terraform-docs.yml" "$$dir"; \
 	done
 
 .PHONY: docs-check
-docs-check: ## Fail if module documentation is out of date
-	@for dir in $(MODULE_DIRS); do \
+docs-check: ## Fail if module or bootstrap documentation is out of date
+	@for dir in $(MODULE_DIRS) $(BOOTSTRAP_DIRS); do \
 		terraform-docs --config "$(CURDIR)/.terraform-docs.yml" --output-check "$$dir"; \
 	done
 
 .PHONY: test
-test: ## Run module tests
-	@for dir in $(MODULE_DIRS); do \
+test: ## Run module and bootstrap tests
+	@for dir in $(MODULE_DIRS) $(BOOTSTRAP_DIRS); do \
 		[[ -d "$$dir/tests" ]] || continue; \
 		echo "==> $$dir"; \
 		terraform -chdir="$$dir" init -backend=false -input=false -no-color > /dev/null; \

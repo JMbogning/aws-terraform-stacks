@@ -1,0 +1,2 @@
+# Copy to local.auto.tfvars, which is not committed, and set your account ID.
+account_id = "111111111111"
