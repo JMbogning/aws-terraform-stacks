@@ -8,3 +8,4 @@ To add a record, copy [template.md](template.md) to `NNNN-short-title.md` using 
 |---|---|---|
 | [0001](0001-repository-layout.md) | Repository layout | Accepted |
 | [0002](0002-plan-and-apply-from-a-workstation.md) | Plan and apply from a workstation | Accepted |
+| [0003](0003-state-backend-configuration.md) | State backend configuration | Accepted |
