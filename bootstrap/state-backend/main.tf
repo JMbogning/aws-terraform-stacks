@@ -15,6 +15,9 @@ resource "aws_kms_alias" "state" {
   target_key_id = aws_kms_key.state.key_id
 }
 
+# Server access logs would need a second bucket for little value here; CloudTrail
+# data events are the option when object-level auditing is required.
+#trivy:ignore:AWS-0089
 resource "aws_s3_bucket" "state" {
   bucket        = local.bucket_name
   force_destroy = var.force_destroy

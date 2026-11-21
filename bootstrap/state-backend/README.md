@@ -39,7 +39,7 @@ About $1 per month, almost all of it for the KMS key. State files weigh a few hu
 ## Security
 
 - Public access is blocked and ACLs are disabled: access is granted only through IAM policies.
-- State files are encrypted with a customer managed KMS key. Reading them requires both S3 and KMS permissions, and CloudTrail logs every decryption.
+- State files are encrypted with a customer managed KMS key, so reading them requires permissions on both the bucket and the key.
 - The bucket policy denies any request that does not use TLS.
 - Versioning keeps previous states for 90 days, to recover from a corrupted or deleted state.
 - The bucket cannot be destroyed while it holds state, unless `force_destroy` is enabled.
