@@ -13,15 +13,15 @@ Each stack is built the way it would be in a company: reusable modules, separate
 
 | Stack | What it deploys | Estimated cost (dev) | Status |
 |---|---|---|---|
-| state-backend | S3 bucket for Terraform state with versioning, encryption and native locking | < $0.01/h | Planned |
+| [state-backend](bootstrap/state-backend) | S3 bucket for Terraform state with versioning, KMS encryption and native locking | < $0.01/h | Available |
 | network | Multi-AZ VPC, optional NAT gateways, VPC endpoints and flow logs | $0.00 to $0.05/h | Planned |
-| rds-postgres | Private PostgreSQL with credentials managed by Secrets Manager and automated backups | ~$0.02/h | Planned |
 | static-site | Private S3 origin behind CloudFront, HTTPS only, security headers | < $0.01/h | Planned |
+| rds-postgres | Private PostgreSQL with credentials managed by Secrets Manager and automated backups | ~$0.02/h | Planned |
 | observability | Dashboards, alarms and notifications for the other stacks | < $0.01/h | Planned |
-| three-tier-app | WAF, Application Load Balancer, ECS Fargate service and PostgreSQL | ~$0.10/h | Planned |
-| eks-cluster | EKS with access entries, Pod Identity and managed add-ons | ~$0.24/h | Planned |
 
-Estimates use on-demand prices in `us-east-1`, the default settings of each stack and no traffic. Every stack can be destroyed with a single command.
+Planned after v1.0.0: `serverless-api`, `three-tier-app` and `eks-cluster`.
+
+Estimates use on-demand prices in `us-east-1`, the default settings of each stack and no traffic. Every stack can be destroyed with a single command, except the state backend, which refuses to delete a bucket that still holds state.
 
 ## Principles
 

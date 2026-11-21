@@ -23,7 +23,6 @@ modules/**/.terraform.lock.hcl
 
 # Values that must not be published (account IDs, IP allow lists)
 local.auto.tfvars
-
 backend.hcl
 
 # Editors and operating systems
