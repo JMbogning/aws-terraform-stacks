@@ -1,6 +1,80 @@
 # Network
 
-Multi-AZ VPC with one public and one private subnet per availability zone.
+Multi-AZ VPC with public and private subnets, optional NAT gateways and IPv6, VPC endpoints and encrypted flow logs.
+
+```mermaid
+flowchart TB
+  internet((Internet))
+  subgraph vpc["VPC"]
+    igw["Internet gateway"]
+    subgraph zone_a["Zone a"]
+      public_a["Public subnet"]
+      private_a["Private subnet"]
+    end
+    subgraph zone_b["Zone b"]
+      public_b["Public subnet"]
+      private_b["Private subnet"]
+    end
+    nat["NAT gateway<br/>optional"]
+    endpoints["S3 and DynamoDB<br/>gateway endpoints"]
+  end
+  logs[("Flow log bucket<br/>KMS, versioned")]
+  internet <--> igw
+  igw <--> public_a & public_b
+  public_a --- nat
+  private_a & private_b -->|"IPv4 to the internet"| nat
+  private_a & private_b --> endpoints
+  vpc -.->|"flow logs"| logs
+```
+
+## Usage
+
+```hcl
+module "network" {
+  source = "../../modules/network"
+
+  name               = "ats-dev"
+  availability_zones = ["us-east-1a", "us-east-1b"]
+  nat_gateway_mode   = "none"
+}
+```
+
+Runnable configurations: [examples/basic](examples/basic) and [examples/complete](examples/complete).
+
+## Subnet layout
+
+Each subnet is a sixteenth of the VPC. Public subnets take blocks 0 to 3 and private subnets blocks 8 to 11, so up to four zones fit without renumbering. With the default `10.0.0.0/16`:
+
+| Zone | Public | Private |
+|---|---|---|
+| 1st | `10.0.0.0/20` | `10.0.128.0/20` |
+| 2nd | `10.0.16.0/20` | `10.0.144.0/20` |
+| 3rd | `10.0.32.0/20` | `10.0.160.0/20` |
+
+With `enable_ipv6`, each subnet also gets the `/64` at the same position in the VPC's `/56`.
+
+Outbound access from private subnets depends on `nat_gateway_mode` ([ADR-0004](../../docs/adr/0004-nat-gateway-strategy.md)). S3 and DynamoDB are always reachable through gateway endpoints.
+
+## Cost
+
+| Item | Price in `us-east-1` | Default |
+|---|---|---|
+| VPC, subnets, route tables, internet gateway, gateway endpoints | free | on |
+| NAT gateway | $0.045/h, plus $0.005/h for its public IPv4 address and $0.045/GB processed | off |
+| Interface endpoint | $0.01/h per zone, plus $0.01/GB | none |
+| Egress-only internet gateway | free, data transfer only | off |
+| Flow logs | $1/month for the KMS key, plus delivery and storage per GB | on |
+
+With the defaults, an idle network costs about $1 per month.
+
+## Security
+
+- The default security group is taken over and left without rules, so a resource launched without an explicit group gets no network access.
+- Public subnets do not assign public IPv4 addresses automatically.
+- Interface endpoints accept HTTPS from the VPC only.
+- Flow logs record accepted and rejected traffic ([ADR-0005](../../docs/adr/0005-flow-logs-to-s3.md)). Their bucket is private, versioned, encrypted with a dedicated KMS key and reachable over TLS only, and only the log delivery service acting for this account can write to it.
+- The flow log bucket does not record its own access logs (Trivy AWS-0089, low severity): it would need yet another bucket.
+- Network ACLs keep their default allow-all rules. Security groups are the access control layer.
 
 <!-- BEGIN_TF_DOCS -->
 ### Requirements
