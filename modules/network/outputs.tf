@@ -32,3 +32,8 @@ output "nat_gateway_public_ips" {
   description = "Public IPv4 addresses of the NAT gateways. Empty when nat_gateway_mode is none."
   value       = [for zone in local.nat_zones : aws_eip.nat[zone].public_ip]
 }
+
+output "vpc_ipv6_cidr_block" {
+  description = "IPv6 CIDR block of the VPC. Null when enable_ipv6 is false."
+  value       = var.enable_ipv6 ? aws_vpc.this.ipv6_cidr_block : null
+}

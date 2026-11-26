@@ -21,11 +21,14 @@ Multi-AZ VPC with one public and one private subnet per availability zone.
 | Name | Type |
 | ---- | ---- |
 | [aws_default_security_group.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/default_security_group) | resource |
+| [aws_egress_only_internet_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/egress_only_internet_gateway) | resource |
 | [aws_eip.nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eip) | resource |
 | [aws_internet_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/internet_gateway) | resource |
 | [aws_nat_gateway.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/nat_gateway) | resource |
+| [aws_route.private_ipv6_egress](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_route.private_nat](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_route.public_internet_ipv4](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
+| [aws_route.public_internet_ipv6](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route) | resource |
 | [aws_route_table.private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
 | [aws_route_table.public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
 | [aws_route_table_association.private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
@@ -41,6 +44,7 @@ Multi-AZ VPC with one public and one private subnet per availability zone.
 | availability\_zones | Availability zones that receive one public and one private subnet each, for example ["us-east-1a", "us-east-1b"]. | `list(string)` | n/a | yes |
 | name | Prefix of every resource name, for example ats-dev. | `string` | n/a | yes |
 | cidr\_block | IPv4 CIDR block of the VPC, between /16 and /20. Each subnet takes a sixteenth of it. | `string` | `"10.0.0.0/16"` | no |
+| enable\_ipv6 | Assign an Amazon-provided IPv6 block to the VPC and a /64 to every subnet. Private subnets reach the internet over IPv6 through an egress-only gateway, which has no hourly charge. | `bool` | `false` | no |
 | nat\_gateway\_mode | Outbound IPv4 internet access for private subnets: none, single (one gateway shared by every zone) or per\_az (one gateway in each zone). See ADR-0004. | `string` | `"none"` | no |
 | tags | Tags added to every resource, on top of the provider default tags. | `map(string)` | `{}` | no |
 
@@ -55,4 +59,5 @@ Multi-AZ VPC with one public and one private subnet per availability zone.
 | public\_subnet\_ids | IDs of the public subnets, in the order of availability\_zones. |
 | vpc\_cidr\_block | IPv4 CIDR block of the VPC. |
 | vpc\_id | ID of the VPC. |
+| vpc\_ipv6\_cidr\_block | IPv6 CIDR block of the VPC. Null when enable\_ipv6 is false. |
 <!-- END_TF_DOCS -->

@@ -45,3 +45,9 @@ variable "nat_gateway_mode" {
     error_message = "nat_gateway_mode must be none, single or per_az."
   }
 }
+
+variable "enable_ipv6" {
+  description = "Assign an Amazon-provided IPv6 block to the VPC and a /64 to every subnet. Private subnets reach the internet over IPv6 through an egress-only gateway, which has no hourly charge."
+  type        = bool
+  default     = false
+}

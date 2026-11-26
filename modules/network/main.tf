@@ -10,9 +10,10 @@ locals {
 }
 
 resource "aws_vpc" "this" {
-  cidr_block           = var.cidr_block
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+  cidr_block                       = var.cidr_block
+  assign_generated_ipv6_cidr_block = var.enable_ipv6
+  enable_dns_support               = true
+  enable_dns_hostnames             = true
 
   tags = merge(var.tags, { Name = "${var.name}-vpc" })
 }
@@ -38,6 +39,10 @@ resource "aws_subnet" "public" {
   availability_zone = each.key
   cidr_block        = local.public_cidrs[each.key]
 
+  # The /56 assigned to the VPC is split into /64s, at the same positions as the IPv4 blocks.
+  ipv6_cidr_block                 = var.enable_ipv6 ? cidrsubnet(aws_vpc.this.ipv6_cidr_block, 8, local.zones[each.key]) : null
+  assign_ipv6_address_on_creation = var.enable_ipv6
+
   tags = merge(var.tags, { Name = "${var.name}-public-${each.key}", Tier = "public" })
 }
 
@@ -47,6 +52,9 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.this.id
   availability_zone = each.key
   cidr_block        = local.private_cidrs[each.key]
+
+  ipv6_cidr_block                 = var.enable_ipv6 ? cidrsubnet(aws_vpc.this.ipv6_cidr_block, 8, local.zones[each.key] + 8) : null
+  assign_ipv6_address_on_creation = var.enable_ipv6
 
   tags = merge(var.tags, { Name = "${var.name}-private-${each.key}", Tier = "private" })
 }
