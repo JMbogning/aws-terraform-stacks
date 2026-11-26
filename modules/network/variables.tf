@@ -73,3 +73,37 @@ variable "interface_endpoints" {
     error_message = "interface_endpoints must contain service names such as ssm, logs or ecr.api."
   }
 }
+
+variable "flow_logs_enabled" {
+  description = "Record the metadata of all traffic in the VPC to a dedicated, encrypted S3 bucket. See ADR-0005."
+  type        = bool
+  default     = true
+}
+
+variable "flow_logs_retention_days" {
+  description = "Number of days flow log files are kept."
+  type        = number
+  default     = 30
+
+  validation {
+    condition     = var.flow_logs_retention_days >= 1
+    error_message = "flow_logs_retention_days must be at least 1."
+  }
+}
+
+variable "flow_logs_force_destroy" {
+  description = "Allow destroy to delete the flow log bucket while it still contains logs. Enable only for disposable environments."
+  type        = bool
+  default     = false
+}
+
+variable "kms_deletion_window_in_days" {
+  description = "Waiting period, in days, before the flow log KMS key is deleted after a destroy."
+  type        = number
+  default     = 30
+
+  validation {
+    condition     = var.kms_deletion_window_in_days >= 7 && var.kms_deletion_window_in_days <= 30
+    error_message = "kms_deletion_window_in_days must be between 7 and 30."
+  }
+}

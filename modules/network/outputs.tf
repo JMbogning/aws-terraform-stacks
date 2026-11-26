@@ -42,3 +42,8 @@ output "endpoints_security_group_id" {
   description = "ID of the security group attached to the interface endpoints. Null when interface_endpoints is empty."
   value       = one(aws_security_group.endpoints[*].id)
 }
+
+output "flow_logs_bucket_name" {
+  description = "Name of the bucket that receives the flow logs. Null when flow_logs_enabled is false."
+  value       = one(aws_s3_bucket.flow_logs[*].id)
+}
