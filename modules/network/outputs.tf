@@ -1,0 +1,49 @@
+output "vpc_id" {
+  description = "ID of the VPC."
+  value       = aws_vpc.this.id
+}
+
+output "vpc_cidr_block" {
+  description = "IPv4 CIDR block of the VPC."
+  value       = aws_vpc.this.cidr_block
+}
+
+output "public_subnet_ids" {
+  description = "IDs of the public subnets, in the order of availability_zones."
+  value       = [for zone in var.availability_zones : aws_subnet.public[zone].id]
+}
+
+output "private_subnet_ids" {
+  description = "IDs of the private subnets, in the order of availability_zones."
+  value       = [for zone in var.availability_zones : aws_subnet.private[zone].id]
+}
+
+output "public_route_table_id" {
+  description = "ID of the route table shared by the public subnets."
+  value       = aws_route_table.public.id
+}
+
+output "private_route_table_ids" {
+  description = "IDs of the private route tables, one per zone, in the order of availability_zones."
+  value       = [for zone in var.availability_zones : aws_route_table.private[zone].id]
+}
+
+output "nat_gateway_public_ips" {
+  description = "Public IPv4 addresses of the NAT gateways. Empty when nat_gateway_mode is none."
+  value       = [for zone in local.nat_zones : aws_eip.nat[zone].public_ip]
+}
+
+output "vpc_ipv6_cidr_block" {
+  description = "IPv6 CIDR block of the VPC. Null when enable_ipv6 is false."
+  value       = var.enable_ipv6 ? aws_vpc.this.ipv6_cidr_block : null
+}
+
+output "endpoints_security_group_id" {
+  description = "ID of the security group attached to the interface endpoints. Null when interface_endpoints is empty."
+  value       = one(aws_security_group.endpoints[*].id)
+}
+
+output "flow_logs_bucket_name" {
+  description = "Name of the bucket that receives the flow logs. Null when flow_logs_enabled is false."
+  value       = one(aws_s3_bucket.flow_logs[*].id)
+}

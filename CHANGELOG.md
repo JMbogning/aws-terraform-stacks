@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `network` module: multi-AZ VPC with public and private subnets, NAT gateways in `none`, `single` or `per_az` mode, optional IPv6 with an egress-only gateway, gateway and interface endpoints, and flow logs to an encrypted S3 bucket.
+- ADR-0004 (NAT gateway strategy) and ADR-0005 (VPC flow logs to S3).
+
 ## [0.1.0] - 2026-11-26
 
 ### Added
