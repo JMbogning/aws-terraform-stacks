@@ -33,9 +33,14 @@ Multi-AZ VPC with one public and one private subnet per availability zone.
 | [aws_route_table.public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table) | resource |
 | [aws_route_table_association.private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
 | [aws_route_table_association.public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route_table_association) | resource |
+| [aws_security_group.endpoints](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group) | resource |
 | [aws_subnet.private](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_subnet.public](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet) | resource |
 | [aws_vpc.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc) | resource |
+| [aws_vpc_endpoint.gateway](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
+| [aws_vpc_endpoint.interface](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
+| [aws_vpc_security_group_ingress_rule.endpoints_https](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_security_group_ingress_rule) | resource |
+| [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 
 ### Inputs
 
@@ -45,6 +50,8 @@ Multi-AZ VPC with one public and one private subnet per availability zone.
 | name | Prefix of every resource name, for example ats-dev. | `string` | n/a | yes |
 | cidr\_block | IPv4 CIDR block of the VPC, between /16 and /20. Each subnet takes a sixteenth of it. | `string` | `"10.0.0.0/16"` | no |
 | enable\_ipv6 | Assign an Amazon-provided IPv6 block to the VPC and a /64 to every subnet. Private subnets reach the internet over IPv6 through an egress-only gateway, which has no hourly charge. | `bool` | `false` | no |
+| gateway\_endpoints | Services reached from private subnets through gateway endpoints, which are free. | `set(string)` | ```[ "s3", "dynamodb" ]``` | no |
+| interface\_endpoints | Services reached from private subnets through interface endpoints, for example ["ssm", "logs"]. Each one costs about $0.01 per hour per availability zone. | `set(string)` | `[]` | no |
 | nat\_gateway\_mode | Outbound IPv4 internet access for private subnets: none, single (one gateway shared by every zone) or per\_az (one gateway in each zone). See ADR-0004. | `string` | `"none"` | no |
 | tags | Tags added to every resource, on top of the provider default tags. | `map(string)` | `{}` | no |
 
@@ -52,6 +59,7 @@ Multi-AZ VPC with one public and one private subnet per availability zone.
 
 | Name | Description |
 | ---- | ----------- |
+| endpoints\_security\_group\_id | ID of the security group attached to the interface endpoints. Null when interface\_endpoints is empty. |
 | nat\_gateway\_public\_ips | Public IPv4 addresses of the NAT gateways. Empty when nat\_gateway\_mode is none. |
 | private\_route\_table\_ids | IDs of the private route tables, one per zone, in the order of availability\_zones. |
 | private\_subnet\_ids | IDs of the private subnets, in the order of availability\_zones. |

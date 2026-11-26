@@ -51,3 +51,25 @@ variable "enable_ipv6" {
   type        = bool
   default     = false
 }
+
+variable "gateway_endpoints" {
+  description = "Services reached from private subnets through gateway endpoints, which are free."
+  type        = set(string)
+  default     = ["s3", "dynamodb"]
+
+  validation {
+    condition     = alltrue([for service in var.gateway_endpoints : contains(["s3", "dynamodb"], service)])
+    error_message = "gateway_endpoints only supports s3 and dynamodb."
+  }
+}
+
+variable "interface_endpoints" {
+  description = "Services reached from private subnets through interface endpoints, for example [\"ssm\", \"logs\"]. Each one costs about $0.01 per hour per availability zone."
+  type        = set(string)
+  default     = []
+
+  validation {
+    condition     = alltrue([for service in var.interface_endpoints : can(regex("^[a-z0-9.-]+$", service))])
+    error_message = "interface_endpoints must contain service names such as ssm, logs or ecr.api."
+  }
+}

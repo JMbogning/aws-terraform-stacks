@@ -37,3 +37,8 @@ output "vpc_ipv6_cidr_block" {
   description = "IPv6 CIDR block of the VPC. Null when enable_ipv6 is false."
   value       = var.enable_ipv6 ? aws_vpc.this.ipv6_cidr_block : null
 }
+
+output "endpoints_security_group_id" {
+  description = "ID of the security group attached to the interface endpoints. Null when interface_endpoints is empty."
+  value       = one(aws_security_group.endpoints[*].id)
+}
