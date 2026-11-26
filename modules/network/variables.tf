@@ -34,3 +34,14 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "nat_gateway_mode" {
+  description = "Outbound IPv4 internet access for private subnets: none, single (one gateway shared by every zone) or per_az (one gateway in each zone). See ADR-0004."
+  type        = string
+  default     = "none"
+
+  validation {
+    condition     = contains(["none", "single", "per_az"], var.nat_gateway_mode)
+    error_message = "nat_gateway_mode must be none, single or per_az."
+  }
+}

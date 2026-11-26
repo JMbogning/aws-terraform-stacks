@@ -27,3 +27,8 @@ output "private_route_table_ids" {
   description = "IDs of the private route tables, one per zone, in the order of availability_zones."
   value       = [for zone in var.availability_zones : aws_route_table.private[zone].id]
 }
+
+output "nat_gateway_public_ips" {
+  description = "Public IPv4 addresses of the NAT gateways. Empty when nat_gateway_mode is none."
+  value       = [for zone in local.nat_zones : aws_eip.nat[zone].public_ip]
+}
